@@ -7,10 +7,8 @@ def add_border(image_path, border_perc=12):
     
     # Determine longer and shorter sides
     height, width = image.shape[:2]
-    if height > width:
-        long_side = height
-    else:
-        long_side = width 
+    
+    long_side = height if height > width else width
         
     border_size = long_side * border_perc // 100
     
