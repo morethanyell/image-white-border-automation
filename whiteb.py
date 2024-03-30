@@ -1,5 +1,7 @@
 import cv2
-import os, sys
+import os
+import sys
+import argparse
 
 def add_border(image_path, border_perc=12):
     # Read the image
@@ -29,7 +31,7 @@ def add_border(image_path, border_perc=12):
     
     return bordered_image
 
-def process_images_in_directory(directory):
+def process_images_in_directory(directory, border_perc):
     # Iterate through each file in the directory
     for filename in os.listdir(directory):
         if filename.endswith(".jpg") or filename.endswith(".jpeg"):
@@ -37,7 +39,7 @@ def process_images_in_directory(directory):
             image_path = os.path.join(directory, filename)
             
             # Add border to the image
-            bordered_image = add_border(image_path)
+            bordered_image = add_border(image_path, border_perc)
             
             # Save the bordered image
             output_path = os.path.join(directory, "bordered_" + filename)
@@ -45,18 +47,16 @@ def process_images_in_directory(directory):
             print(f"Bordered image saved: {output_path}")
 
 if __name__ == "__main__":
-    # Check if the input directory is provided as an argument
-    if len(sys.argv) != 2:
-        print("Usage: python script_name.py input_directory")
-        sys.exit(1)
-    
-    # Get the input directory from the command-line argument
-    input_directory = sys.argv[1]
+    # Set up argument parser
+    parser = argparse.ArgumentParser(description="Add white border to images")
+    parser.add_argument("input_directory", help="Directory containing images")
+    parser.add_argument("--border-perc", type=float, default=12, help="Percentage of border thickness")
+    args = parser.parse_args()
     
     # Check if the input directory exists
-    if not os.path.isdir(input_directory):
+    if not os.path.isdir(args.input_directory):
         print("Input directory does not exist.")
         sys.exit(1)
     
     # Process images in the specified directory
-    process_images_in_directory(input_directory)
+    process_images_in_directory(args.input_directory, args.border_perc)
