@@ -3,35 +3,65 @@ import os
 import sys
 import argparse
 
-def add_border(image_path, border_perc=12):
+def add_border(image_path, border_perc=12, aspect_ratio='sq'):
     # Read the image
     image = cv2.imread(image_path)
     
     # Determine longer and shorter sides
     height, width = image.shape[:2]
     
-    long_side = height if height > width else width
+    # Calculate longer side after adding border
+    long_side = max(height, width)
+    border_size = int(long_side * border_perc // 100)
+    
+    top, bottom, left, right = 0, 0, 0, 0
+    
+    if aspect_ratio == 'instav':
         
-    border_size = long_side * border_perc // 100
+        if height > width:
+            top, bottom = border_size, border_size
+            new_height = height + (2 * border_size)
+            new_width = (new_height * 4) / 5
+            left, right = int((new_width - width) / 2), int((new_width - width) / 2)
+        else:
+            left, right = border_size, border_size
+            new_width = width + (2 * border_size)
+            new_height = (new_width * 5) / 4
+            top, bottom = int((new_height - height) / 2), int((new_height - height) / 2)
+              
+        image = cv2.copyMakeBorder(image, top, bottom, left, right, cv2.BORDER_CONSTANT, value=(255, 255, 255))
+        
+    elif aspect_ratio == 'instah':
+        
+        if height > width:
+            top, bottom = border_size, border_size
+            new_height = height + (2 * border_size)
+            new_width = (new_height * 5) / 4
+            left, right = int((new_width - width) / 2), int((new_width - width) / 2)
+        else:
+            left, right = border_size, border_size
+            new_width = width + (2 * border_size)
+            new_height = (new_width * 4) / 5
+            top, bottom = int((new_height - height) / 2), int((new_height - height) / 2)
+              
+        image = cv2.copyMakeBorder(image, top, bottom, left, right, cv2.BORDER_CONSTANT, value=(255, 255, 255))
+        
+    else:
+        
+        new_height = int(height + 2 * border_size)
+        new_width = int(width + 2 * border_size)
+        
+        image = cv2.copyMakeBorder(image, border_size, border_size, border_size, border_size, cv2.BORDER_CONSTANT, value=(255, 255, 255))
+        
+        # Crop to make square
+        if new_height > new_width:
+            image = cv2.copyMakeBorder(image, 0, 0, (new_height - new_width) // 2, (new_height - new_width) // 2, cv2.BORDER_CONSTANT, value=(255, 255, 255))
+        elif new_width > new_height:
+            image = cv2.copyMakeBorder(image, (new_width - new_height) // 2, (new_width - new_height) // 2, 0, 0, cv2.BORDER_CONSTANT, value=(255, 255, 255))
     
-    # Calculate new dimensions
-    new_long_side = long_side + border_size
-    
-    # Calculate border sizes and ensure they are integers
-    top_border = int((new_long_side - height) // 2)
-    bottom_border = int(new_long_side - height - top_border)
-    left_border = int((new_long_side - width) // 2)
-    right_border = int(new_long_side - width - left_border)
-    
-    # Add white border
-    bordered_image = cv2.copyMakeBorder(
-        image, top_border, bottom_border, left_border, right_border,
-        cv2.BORDER_CONSTANT, value=(255, 255, 255)
-    )
-    
-    return bordered_image
+    return image
 
-def process_images_in_directory(directory, border_perc, overwrite_orig):
+def process_images_in_directory(directory, border_perc, overwrite_orig, aspect_ratio):
     # Iterate through each file in the directory
     for filename in os.listdir(directory):
         if filename.endswith(".jpg") or filename.endswith(".jpeg"):
@@ -39,7 +69,7 @@ def process_images_in_directory(directory, border_perc, overwrite_orig):
             image_path = os.path.join(directory, filename)
             
             # Add border to the image
-            bordered_image = add_border(image_path, border_perc)
+            bordered_image = add_border(image_path, border_perc, aspect_ratio)
             
             # Decide whether to overwrite the original or save with prefix
             if overwrite_orig.lower() == 'y':
@@ -57,6 +87,7 @@ if __name__ == "__main__":
     parser.add_argument("input_directory", help="Directory containing images")
     parser.add_argument("--border-perc", type=float, default=12, help="Percentage of border thickness (must be greater than 0)")
     parser.add_argument("--overwrite-orig", choices=['y', 'n'], default='n', help="Whether to overwrite original files (y/n)")
+    parser.add_argument("--ar", choices=['instav', 'instah', 'sq'], default='sq', help="Aspect ratio: instav, instah, or sq (default: sq)")
     args = parser.parse_args()
     
     # Check if the border percentage is greater than 0
@@ -70,4 +101,4 @@ if __name__ == "__main__":
         sys.exit(1)
     
     # Process images in the specified directory
-    process_images_in_directory(args.input_directory, args.border_perc, args.overwrite_orig)
+    process_images_in_directory(args.input_directory, args.border_perc, args.overwrite_orig, args.ar)
