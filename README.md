@@ -3,17 +3,6 @@
 
 I made this script to automate adding white borders to my photos. Hope it helps you too. :) 
 
-#### Functionality
-Makes your photos square by adding white borders. For horizontal images, a smaller white border is added on the width. Inversely for veritical images, a smaller white border is added on the length.
-
-- This script adds 12% (pixels) of the longer side of the image
-- Then it adds `((longer side + %12) - shorter side)` to the shorter side of the image
-- The resulting new size of the image will be a square
-- Does not overwrite the original file
-
-#### Example
-If you have a horizontal image with a width of 3000 and a length of 2000, it will add 360 white pixels on left and right (horizontally) and then 1720 white pixels on top and bottom (veritically).
-
 #### Usage
 
 - Install Python on your computer
@@ -21,6 +10,15 @@ If you have a horizontal image with a width of 3000 and a length of 2000, it wil
 - Open your termninal and install the dependency using `pip` E.g.:
 `pip install opencv-python` 
 - To add white borders on your images, run the script like below
-`python3 .\whiteb.py "C:\Users\myComputerUsername\Downloads\Images\Japan Trip 2024"`
-
-Above script will start adding white borders to all JPEG images in the directory without overwriting the original images. The filename of the edited images will be `bordered_<original filename>.jpeg`
+    - `python3 .\whiteb.py "C:\Users\myComputerUsername\Downloads\Images\Japan Trip 2024"`
+    - Above script will start adding white borders to all JPEG images in the directory without overwriting the original images. The filename of the edited images will be `bordered_<original filename>.jpeg`
+- You include the following flags
+    - Aspect Ratio: `--ar=[instav|instah|sq]` 
+        - `sq` is the default
+        - `instav` results to adding border such that new AR is Instagram-friendly vertical 5:4 image
+        - `instah` results to adding border such that new AR is Instagram-friendly vertical 4:5 image
+    - Border Percentage: `--border-perc=integer`
+        - Accepts values from 1 to 99. Defaults to 12.
+        - The border thickness derived from the image's shorter side, e.g.: a horizontal image with a leght of 1000 will add 100 pixels top and bottom if `--border-perc=10` is supplied
+    - Overwrite Original: `--overwrite-orig=[y|n]`
+        - Self-explanatory. Defaults to `n`
