@@ -78,7 +78,7 @@ def process_images_in_directory(directory, border_perc, overwrite_orig, aspect_r
                 output_path = os.path.join(directory, "bordered_" + filename)
             
             # Save the bordered image
-            cv2.imwrite(output_path, bordered_image)
+            cv2.imwrite(output_path, bordered_image, [cv2.IMWRITE_JPEG_QUALITY, 100])
             print(f"Bordered image saved: {output_path}")
 
 if __name__ == "__main__":
