@@ -1,3 +1,8 @@
+#!/usr/bin/env python3
+
+# Author: morethanyell (daniel.l.astillero@gmail.com)
+# Description: Adds white border to JPEG images in a directory. The default outputfile appends "bordered_" to the filenames.
+
 import cv2
 import os
 import sys
@@ -46,6 +51,12 @@ def add_border(image_path, border_perc=12, aspect_ratio='sq'):
               
         image = cv2.copyMakeBorder(image, top, bottom, left, right, cv2.BORDER_CONSTANT, value=(255, 255, 255))
         
+    elif aspect_ratio == 'ofpxl':
+        
+        top, bottom, left, right = 150, 150, 150, 150
+              
+        image = cv2.copyMakeBorder(image, top, bottom, left, right, cv2.BORDER_CONSTANT, value=(255, 255, 255))
+        
     else:
         
         new_height = int(height + 2 * border_size)
@@ -61,25 +72,33 @@ def add_border(image_path, border_perc=12, aspect_ratio='sq'):
     
     return image
 
-def process_images_in_directory(directory, border_perc, overwrite_orig, aspect_ratio):
+def process_images_in_directory(directory, border_perc, overwrite_orig, aspect_ratio, qual):
     # Iterate through each file in the directory
     for filename in os.listdir(directory):
-        if filename.endswith(".jpg") or filename.endswith(".jpeg"):
-            # Get the full path to the image file
-            image_path = os.path.join(directory, filename)
-            
-            # Add border to the image
-            bordered_image = add_border(image_path, border_perc, aspect_ratio)
-            
-            # Decide whether to overwrite the original or save with prefix
-            if overwrite_orig.lower() == 'y':
-                output_path = image_path
-            else:
-                output_path = os.path.join(directory, "bordered_" + filename)
-            
-            # Save the bordered image
-            cv2.imwrite(output_path, bordered_image, [cv2.IMWRITE_JPEG_QUALITY, 100])
-            print(f"Bordered image saved: {output_path}")
+        
+        if not filename.endswith((".jpg", ".jpeg")):
+            print("Skipping this file as it is not a JPEG image. Sorry.")
+            continue
+        
+        if filename.startswith("bordered_"):
+            print(f"Skipping an already bordered image.: {filename}")
+            continue
+        
+        # Get the full path to the image file
+        image_path = os.path.join(directory, filename)
+        
+        # Add border to the image
+        bordered_image = add_border(image_path, border_perc, aspect_ratio)
+        
+        # Decide whether to overwrite the original or save with prefix
+        if overwrite_orig.lower() == 'y':
+            output_path = image_path
+        else:
+            output_path = os.path.join(directory, "bordered_" + filename)
+
+        # Save the bordered image
+        cv2.imwrite(output_path, bordered_image, [cv2.IMWRITE_JPEG_QUALITY, qual])
+        print(f"Bordered image saved: {output_path}")
 
 if __name__ == "__main__":
     # Set up argument parser
@@ -87,7 +106,8 @@ if __name__ == "__main__":
     parser.add_argument("input_directory", help="Directory containing images")
     parser.add_argument("--border-perc", type=float, default=12, help="Percentage of border thickness (must be greater than 0)")
     parser.add_argument("--overwrite-orig", choices=['y', 'n'], default='n', help="Whether to overwrite original files (y/n)")
-    parser.add_argument("--ar", choices=['instav', 'instah', 'sq'], default='sq', help="Aspect ratio: instav, instah, or sq (default: sq)")
+    parser.add_argument("--ar", choices=['instav', 'instah', 'ofpxl', 'sq'], default='sq', help="Aspect ratio: instav, instah, or sq (default: sq)")
+    parser.add_argument("--qual", type=int, default=100, help="JPEG quality. Defaults to 85%")
     args = parser.parse_args()
     
     # Check if the border percentage is greater than 0
@@ -95,10 +115,14 @@ if __name__ == "__main__":
         print("Error: Border percentage must be greater than 0.")
         sys.exit(1)
     
+    if args.qual > 100 or args.qual < 1:
+        print(f"JPEG quality selected must be from 1 to 100. Defaulting to 100% instead.")
+        qual = 100
+    
     # Check if the input directory exists
     if not os.path.isdir(args.input_directory):
         print("Input directory does not exist.")
         sys.exit(1)
     
     # Process images in the specified directory
-    process_images_in_directory(args.input_directory, args.border_perc, args.overwrite_orig, args.ar)
+    process_images_in_directory(args.input_directory, args.border_perc, args.overwrite_orig, args.ar, args.qual)
