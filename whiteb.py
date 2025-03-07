@@ -75,9 +75,9 @@ def add_border(image_path, border_perc=12, aspect_ratio='sq'):
 def process_images_in_directory(directory, border_perc, overwrite_orig, aspect_ratio, qual):
     # Iterate through each file in the directory
     for filename in os.listdir(directory):
-        
+
         if not filename.endswith((".jpg", ".jpeg")):
-            print("Skipping this file as it is not a JPEG image. Sorry.")
+            print(f"Skipping this file: {filename}, as it is not a JPEG image. Sorry.")
             continue
         
         if filename.startswith("bordered_"):
