@@ -52,10 +52,8 @@ def add_border(image_path, border_perc=12, aspect_ratio='sq'):
         image = cv2.copyMakeBorder(image, top, bottom, left, right, cv2.BORDER_CONSTANT, value=(255, 255, 255))
         
     elif aspect_ratio == 'ofpxl':
-        
-        top, bottom, left, right = 150, 150, 150, 150
               
-        image = cv2.copyMakeBorder(image, top, bottom, left, right, cv2.BORDER_CONSTANT, value=(255, 255, 255))
+        image = cv2.copyMakeBorder(image, border_size, border_size, border_size, border_size, cv2.BORDER_CONSTANT, value=(255, 255, 255))
         
     else:
         
@@ -102,11 +100,11 @@ def process_images_in_directory(directory, border_perc, overwrite_orig, aspect_r
 
 if __name__ == "__main__":
     # Set up argument parser
-    parser = argparse.ArgumentParser(description="Add white border to images")
+    parser = argparse.ArgumentParser(description="Adds white border to images")
     parser.add_argument("input_directory", help="Directory containing images")
     parser.add_argument("--border-perc", type=float, default=12, help="Percentage of border thickness (must be greater than 0)")
     parser.add_argument("--overwrite-orig", choices=['y', 'n'], default='n', help="Whether to overwrite original files (y/n)")
-    parser.add_argument("--ar", choices=['instav', 'instah', 'ofpxl', 'sq'], default='sq', help="Aspect ratio: instav, instah, or sq (default: sq)")
+    parser.add_argument("--ar", choices=['instav', 'instah', 'ofpxl', 'sq'], default='sq', help="Aspect ratio: instav, instah, ofpxl, or sq (default: sq)")
     parser.add_argument("--qual", type=int, default=100, help="JPEG quality. Defaults to 85%")
     args = parser.parse_args()
     
